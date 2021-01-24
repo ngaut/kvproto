@@ -143,6 +143,7 @@ message StorageBackend {
         Local local = 2;
         S3 s3 = 3;
         GCS gcs = 4;
+	CloudDynamic cloud_dynamic = 5;
     }
 }
 
@@ -157,11 +158,11 @@ message Local {
 // S3 storage backend saves files into S3 compatible storages
 // For non-aws providers, endpoint must be provided
 message S3 {
-    string endpoint = 1;
-    string region = 2;
-    string bucket = 3;
-    string prefix = 4;
-    string storage_class = 5;
+    string endpoint = 1 [deprecated = true]; // use bucket_info
+    string region = 2 [deprecated = true]; // use bucket_info
+    string bucket = 3 [deprecated = true]; // use bucket_info
+    string prefix = 4 [deprecated = true]; // use bucket_info
+    string storage_class = 5 [deprecated = true]; // use bucket_info
     // server side encryption
     string sse = 6;
     string acl = 7;
@@ -169,14 +170,15 @@ message S3 {
     string secret_access_key = 9;
     bool   force_path_style = 10;
     string sse_kms_key_id = 11;
+    Bucket bucket_info = 12;
 }
 
 // GCS storage backend saves files into google cloud storage.
 message GCS {
-    string endpoint = 1;
-    string bucket = 2;
-    string prefix = 3;
-    string storage_class = 4;
+    string endpoint = 1 [deprecated = true]; // use bucket_info
+    string bucket = 2 [deprecated = true]; // use bucket_info
+    string prefix = 3 [deprecated = true]; // use bucket_info
+    string storage_class = 4 [deprecated = true]; // use bucket_info
     // If not empty, applies a predefined set of access controls.
     // See https://cloud.google.com/storage/docs/access-control/lists#predefined-acl
     // for valid values.
@@ -185,7 +187,26 @@ message GCS {
     // You can get one from https://console.cloud.google.com/apis/credentials, and
     // copy the content, set it as string here.
     string credentials_blob = 6;
+    Bucket bucket_info = 7;
 }
+
+// S3 and GCS can be transitioned to use this
+message Bucket {
+    string endpoint = 1; // use a different endpoint (host + url)
+    string host = 2; // use a different host
+    string region = 3;
+    string bucket = 4;
+    string prefix = 5;
+    string storage_class = 6;
+}
+
+// CloudDynamic allows adding new fields without changing protobuf definitions
+message CloudDynamic {
+    Bucket bucket = 1;
+    string name = 2;
+    map<string, string> attrs = 3;
+}
+
 
 message BackupResponse {
     Error error = 1;
